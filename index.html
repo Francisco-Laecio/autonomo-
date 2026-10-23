@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomo+ | Controle financeiro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- ===== AUTENTICAÇÃO ===== -->
+  <main id="authView" class="auth">
+    <section class="auth-card">
+      <div class="logo">Autonomo<span>+</span></div>
+      <h1>Organize seu dinheiro, controle seu futuro</h1>
+      <p class="demo-note">Versão demonstrativa: os dados ficam apenas neste navegador (localStorage), sem segurança de produção. Não use dados ou senhas reais.</p>
+
+      <form id="loginForm" novalidate>
+        <label for="loginEmail">E-mail</label>
+        <input id="loginEmail" type="email" autocomplete="email" placeholder="voce@email.com">
+        <label for="loginPass">Senha</label>
+        <div class="pass-wrap">
+          <input id="loginPass" type="password" autocomplete="current-password" placeholder="Sua senha">
+          <button type="button" class="ghost toggle-pass" data-target="loginPass" aria-label="Mostrar ou ocultar senha">👁</button>
+        </div>
+        <p class="form-error" role="alert"></p>
+        <button class="btn primary block" type="submit">Entrar</button>
+        <p class="links"><a href="#" data-show="forgotForm">Esqueci minha senha</a> · <a href="#" data-show="registerForm">Criar conta</a></p>
+      </form>
+
+      <form id="registerForm" class="hidden" novalidate>
+        <h2>Criar conta</h2>
+        <label for="regName">Nome</label>
+        <input id="regName" type="text" autocomplete="name">
+        <label for="regEmail">E-mail</label>
+        <input id="regEmail" type="email" autocomplete="email">
+        <label for="regPass">Senha (mínimo 6 caracteres)</label>
+        <div class="pass-wrap">
+          <input id="regPass" type="password" autocomplete="new-password">
+          <button type="button" class="ghost toggle-pass" data-target="regPass" aria-label="Mostrar ou ocultar senha">👁</button>
+        </div>
+        <label for="regPass2">Confirmar senha</label>
+        <input id="regPass2" type="password" autocomplete="new-password">
+        <p class="form-error" role="alert"></p>
+        <button class="btn primary block" type="submit">Criar conta</button>
+        <p class="links"><a href="#" data-show="loginForm">Já tenho conta</a></p>
+      </form>
+
+      <form id="forgotForm" class="hidden" novalidate>
+        <h2>Redefinir senha</h2>
+        <p class="demo-note">Na demonstração não há envio de e-mail: informe o e-mail cadastrado e defina uma nova senha.</p>
+        <label for="fgEmail">E-mail cadastrado</label>
+        <input id="fgEmail" type="email" autocomplete="email">
+        <label for="fgPass">Nova senha</label>
+        <input id="fgPass" type="password" autocomplete="new-password">
+        <label for="fgPass2">Confirmar nova senha</label>
+        <input id="fgPass2" type="password" autocomplete="new-password">
+        <p class="form-error" role="alert"></p>
+        <button class="btn primary block" type="submit">Redefinir senha</button>
+        <p class="links"><a href="#" data-show="loginForm">Voltar ao login</a></p>
+      </form>
+    </section>
+  </main>
+
+  <!-- ===== PAINEL ===== -->
+  <div id="appView" class="hidden">
+    <header class="topbar">
+      <div class="logo small">Autonomo<span>+</span></div>
+      <div class="top-info">
+        <strong id="greeting">Olá!</strong>
+        <span id="todayLabel"></span>
+      </div>
+      <div class="top-actions">
+        <span class="avatar" id="avatar" title="Perfil" aria-label="Perfil">A</span>
+        <button id="logoutBtn" class="btn outline" type="button">Sair</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="balance-card" aria-label="Saldo disponível">
+        <div>
+          <p>💰 Saldo disponível</p>
+          <h2 id="balanceMain">R$ 0,00</h2>
+        </div>
+        <button id="eyeBtn" class="ghost light" type="button" aria-label="Ocultar ou mostrar saldo">👁</button>
+      </section>
+
+      <section class="summary" aria-label="Resumo financeiro">
+        <article class="stat in"><span class="ico">📈</span><p>Total de entradas</p><strong id="totalIn">R$ 0,00</strong></article>
+        <article class="stat out"><span class="ico">📉</span><p>Total de saídas</p><strong id="totalOut">R$ 0,00</strong></article>
+        <article class="stat bal"><span class="ico">🧾</span><p>Saldo atual</p><strong id="totalBal">R$ 0,00</strong></article>
+      </section>
+      <p class="hint" id="periodHint"></p>
+
+      <section class="actions">
+        <button id="addBtn" class="btn primary" type="button">+ Adicionar dinheiro</button>
+        <button id="withdrawBtn" class="btn danger" type="button">- Retirar dinheiro</button>
+      </section>
+
+      <section class="card" aria-label="Filtros">
+        <div class="filters">
+          <div><label for="fSearch">Pesquisar descrição</label><input id="fSearch" type="search" placeholder="Ex.: manutenção"></div>
+          <div><label for="fType">Tipo</label>
+            <select id="fType"><option value="">Todos</option><option value="in">Entradas</option><option value="out">Saídas</option></select></div>
+          <div><label for="fMonth">Mês</label><input id="fMonth" type="month"></div>
+          <div><label for="fFrom">De</label><input id="fFrom" type="date"></div>
+          <div><label for="fTo">Até</label><input id="fTo" type="date"></div>
+          <div class="end"><button id="clearBtn" class="btn outline" type="button">Limpar filtros</button></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Histórico de movimentações">
+        <h2>Histórico de movimentações</h2>
+        <div id="emptyState" class="empty hidden">Nenhuma movimentação encontrada. Adicione dinheiro ou ajuste os filtros. 🌱</div>
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th class="num">Valor</th><th><span class="sr">Ações</span></th></tr></thead>
+            <tbody id="txBody"></tbody>
+          </table>
+        </div>
+        <div id="txCards" class="tx-cards"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===== MODAIS ===== -->
+  <dialog id="txModal" aria-labelledby="txTitle">
+    <form id="txForm" novalidate>
+      <h2 id="txTitle">Adicionar dinheiro</h2>
+      <label for="txAmount">Valor (R$)</label>
+      <input id="txAmount" type="text" inputmode="decimal" placeholder="0,00">
+      <label for="txDesc">Descrição</label>
+      <input id="txDesc" type="text" maxlength="80">
+      <label for="txCat">Categoria</label>
+      <select id="txCat"></select>
+      <label for="txDate">Data</label>
+      <input id="txDate" type="date">
+      <p class="form-error" role="alert"></p>
+      <div class="modal-actions">
+        <button id="txCancel" class="btn outline" type="button">Cancelar</button>
+        <button id="txSubmit" class="btn primary" type="submit">Salvar entrada</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmModal" aria-labelledby="confirmTitle">
+    <h2 id="confirmTitle">Excluir movimentação?</h2>
+    <p id="confirmText"></p>
+    <div class="modal-actions">
+      <button id="confirmNo" class="btn outline" type="button">Cancelar</button>
+      <button id="confirmYes" class="btn danger" type="button">Excluir</button>
+    </div>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
